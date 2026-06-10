@@ -1,0 +1,15 @@
+# Normalize line endings: store as LF in the repo, check out native on each OS.
+* text=auto eol=lf
+
+# Binary assets: no EOL conversion, no textual diffs (protects the bytes).
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.pdf  binary
+*.safetensors binary
+*.ckpt binary
+*.pt   binary
+*.pth  binary
+*.gguf binary
