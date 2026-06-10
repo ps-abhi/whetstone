@@ -1,0 +1,41 @@
+CURRICULUM.md
+CONVENTIONS.md
+SPEC.md
+*/SPEC.md
+**/SPEC.md
+
+# Outputs & artifacts 
+*/outputs/
+outputs/
+wandb/
+*.ckpt
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+
+# Datasets / large data
+data/
+datasets/
+*.parquet
+*.arrow
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+*.egg-info/
+.ipynb_checkpoints/
+
+# DeepSpeed / distributed scratch
+*.zero/
+global_step*/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
