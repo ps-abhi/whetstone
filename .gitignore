@@ -5,6 +5,7 @@ SPEC.md
 **/SPEC.md
 
 # Outputs & artifacts 
+scratchpad.ipynb
 */outputs/
 outputs/
 wandb/
