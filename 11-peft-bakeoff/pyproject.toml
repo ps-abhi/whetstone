@@ -1,0 +1,32 @@
+[project]
+name = "11-peft-bakeoff"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=1.13.0",
+    "bitsandbytes>=0.49.2",
+    "datasets>=5.0.0",
+    "hydra-core>=1.3.2",
+    "peft>=0.19.1",
+    "python-dotenv>=1.2.2",
+    "torch>=2.12.0",
+    "transformers>=5.10.2",
+    "trl>=1.5.1",
+    "wandb>=0.27.2",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.3.0",
+    "ruff>=0.15.16",
+]
+
+[[tool.uv.index]]
+  name = "pytorch-cu132"
+  url = "https://download.pytorch.org/whl/cu132"
+  explicit = true            # only used by packages that opt in below
+
+  [tool.uv.sources]
+  torch = [
+    { index = "pytorch-cu132", marker = "sys_platform == 'linux'" },
+  ]

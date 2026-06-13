@@ -1,5 +1,5 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import LoraConfig, TaskType, get_peft_model, prepare_model_for_kbit_training, PrefixTuningConfig
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, PrefixTuningConfig
 from datasets import load_dataset
 from trl import SFTTrainer, SFTConfig
 import torch
@@ -7,6 +7,12 @@ import random
 import numpy as np
 import hydra
 from omegaconf import DictConfig, OmegaConf
+import wandb
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -23,7 +29,15 @@ def main(cfg : DictConfig):
     random.seed(cfg.seed)
     torch.manual_seed(cfg.seed)
     np.random.seed(cfg.seed)
-    
+
+    wandb.login(key=os.getenv("WANDB_KEY"))
+    run = wandb.init(
+        project = "whetstone-11-peft",
+        group = "bakeoff",
+        name = cfg.peft.name,
+        config=OmegaConf.to_container(cfg, resolve=True)
+    ) 
+   
     dataset = load_dataset(cfg.dataset_name)
     dataset = dataset.map(preprocessing, remove_columns=["prompt", "completion"])
     train_dataset = dataset["train"]
@@ -54,11 +68,15 @@ def main(cfg : DictConfig):
     
     model.print_trainable_parameters()
 
+    trainable, total = model.get_nb_trainable_parameters()
+    run.summary["trainable_params"] = trainable
+    run.summary["trainable_pct"] = (trainable/total) *100
+
     sft_kwargs = OmegaConf.to_container(cfg.train, resolve=True)
 
     args = SFTConfig(
         seed = cfg.seed, 
-        report_to="wandb"
+        report_to="wandb",
         **sft_kwargs
     )
 
@@ -69,9 +87,11 @@ def main(cfg : DictConfig):
         processing_class = tokenizer,
     )
 
-    trainer.train()
-
+    torch.cuda.reset_peak_memory_stats()
+    result = trainer.train()
+    run.summary["train_runtime_s"] = result.metrics["train_runtime"]
+    run.summary["peak_vram_gb"] = torch.cuda.max_memory_allocated()/1e9
+    run.finish()
 
 if __name__=="__main__":
     main()
-

@@ -16,3 +16,4 @@ train :
   output_dir: ./lora_train
   bf16 : True
   assistant_only_loss : True
+  logging_steps: 10
