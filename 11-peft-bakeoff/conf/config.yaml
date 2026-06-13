@@ -1,0 +1,18 @@
+model_name : Qwen/Qwen3-4B-Instruct-2507
+dataset_name : HuggingFaceH4/CodeAlpaca_20K
+seed : 42
+
+defaults:
+- peft : lora
+- _self_
+
+train :
+  learning_rate : 2e-4
+  per_device_train_batch_size : 2
+  gradient_accumulation_steps: 8
+  max_steps: 1000
+  max_length: 1024
+  lr_scheduler_type: cosine
+  output_dir: ./lora_train
+  bf16 : True
+  assistant_only_loss : True
