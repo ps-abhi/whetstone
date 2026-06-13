@@ -13,7 +13,11 @@ train :
   max_steps: 1000
   max_length: 1024
   lr_scheduler_type: cosine
-  output_dir: ./lora_train
+  output_dir: ./outputs/train/${peft.name}
   bf16 : True
   assistant_only_loss : True
   logging_steps: 10
+
+hydra:
+  job:
+    chdir: false

@@ -9,7 +9,9 @@ import hydra
 from omegaconf import DictConfig, OmegaConf
 import wandb
 import os
+import json
 from dotenv import load_dotenv
+from eval_perplexity import compute_perplexity
 
 load_dotenv()
 
@@ -39,9 +41,8 @@ def main(cfg : DictConfig):
     ) 
    
     dataset = load_dataset(cfg.dataset_name)
-    dataset = dataset.map(preprocessing, remove_columns=["prompt", "completion"])
-    train_dataset = dataset["train"]
-    test_dataset = dataset["test"]
+    train_dataset = dataset["train"].map(preprocessing, remove_columns=["prompt", "completion"])
+    test_dataset = dataset["test"]   # raw prompt/completion — compute_perplexity needs these fields
     
     tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
     quant = cfg.peft.get("quantization")
@@ -91,6 +92,17 @@ def main(cfg : DictConfig):
     result = trainer.train()
     run.summary["train_runtime_s"] = result.metrics["train_runtime"]
     run.summary["peak_vram_gb"] = torch.cuda.max_memory_allocated()/1e9
+
+    # (after VRAM capture so eval allocations don't inflate the training peak)
+    test_perplexity = compute_perplexity(model, test_dataset, tokenizer, device)
+    run.summary["test_perplexity"] = test_perplexity
+
+    adapter_dir = f"outputs/adapters/{cfg.peft.name}"
+    model.save_pretrained(adapter_dir)
+    tokenizer.save_pretrained(adapter_dir)        # so eval doesn't depend on re-pulling from the Hub
+    if quant:                                     # qlora only: persist the 4-bit recipe for a clean reload later
+        with open(os.path.join(adapter_dir, "quant.json"), "w") as f:
+            json.dump(quant, f, indent=2)
     run.finish()
 
 if __name__=="__main__":
