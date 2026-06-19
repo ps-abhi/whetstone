@@ -1,0 +1,558 @@
+[
+  {
+    "name": "get_weather_forecast",
+    "description": "Retrieve a multi-day weather forecast for a given location.",
+    "parameter": [
+      {"name": "location", "type": "string", "required": true, "description": "City name, postal code, or 'lat,lon' coordinates."},
+      {"name": "days", "type": "integer", "required": false, "description": "Number of forecast days to return, from 1 to 14."},
+      {"name": "units", "type": "string", "required": false, "description": "Temperature unit: 'celsius' or 'fahrenheit'."}
+    ]
+  },
+  {
+    "name": "get_current_conditions",
+    "description": "Get the current real-time weather conditions at a location.",
+    "parameter": [
+      {"name": "location", "type": "string", "required": true, "description": "City name, postal code, or 'lat,lon' coordinates."},
+      {"name": "include_air_quality", "type": "boolean", "required": false, "description": "Whether to include the current air quality index."}
+    ]
+  },
+  {
+    "name": "get_weather_alerts",
+    "description": "List active severe weather alerts and warnings for a region.",
+    "parameter": [
+      {"name": "region", "type": "string", "required": true, "description": "State, province, or country code to query alerts for."},
+      {"name": "severity", "type": "string", "required": false, "description": "Minimum severity filter: 'minor', 'moderate', 'severe', or 'extreme'."}
+    ]
+  },
+  {
+    "name": "send_email",
+    "description": "Compose and send an email message to one or more recipients.",
+    "parameter": [
+      {"name": "to", "type": "array", "required": true, "description": "List of recipient email addresses."},
+      {"name": "subject", "type": "string", "required": true, "description": "Subject line of the email."},
+      {"name": "body", "type": "string", "required": true, "description": "Plain-text or HTML body content of the email."},
+      {"name": "cc", "type": "array", "required": false, "description": "List of email addresses to copy."},
+      {"name": "attachments", "type": "array", "required": false, "description": "List of file IDs or URLs to attach."}
+    ]
+  },
+  {
+    "name": "search_emails",
+    "description": "Search the user's mailbox for messages matching a query.",
+    "parameter": [
+      {"name": "query", "type": "string", "required": true, "description": "Full-text or filter query, e.g. 'from:alice invoice'."},
+      {"name": "max_results", "type": "integer", "required": false, "description": "Maximum number of messages to return."},
+      {"name": "unread_only", "type": "boolean", "required": false, "description": "Whether to return only unread messages."}
+    ]
+  },
+  {
+    "name": "create_email_draft",
+    "description": "Save an email as a draft without sending it.",
+    "parameter": [
+      {"name": "to", "type": "array", "required": false, "description": "List of intended recipient email addresses."},
+      {"name": "subject", "type": "string", "required": false, "description": "Draft subject line."},
+      {"name": "body", "type": "string", "required": false, "description": "Draft body content."}
+    ]
+  },
+  {
+    "name": "create_calendar_event",
+    "description": "Create a new event on the user's calendar.",
+    "parameter": [
+      {"name": "title", "type": "string", "required": true, "description": "Title of the calendar event."},
+      {"name": "start_time", "type": "string", "required": true, "description": "Event start in ISO 8601 datetime format."},
+      {"name": "end_time", "type": "string", "required": true, "description": "Event end in ISO 8601 datetime format."},
+      {"name": "attendees", "type": "array", "required": false, "description": "List of attendee email addresses to invite."},
+      {"name": "location", "type": "string", "required": false, "description": "Physical address or video-call link for the event."}
+    ]
+  },
+  {
+    "name": "list_upcoming_events",
+    "description": "List the user's upcoming calendar events within a time window.",
+    "parameter": [
+      {"name": "days_ahead", "type": "integer", "required": false, "description": "Number of days into the future to include."},
+      {"name": "calendar_id", "type": "string", "required": false, "description": "Identifier of the specific calendar to query."}
+    ]
+  },
+  {
+    "name": "find_meeting_slot",
+    "description": "Find a free time slot common to all participants for a meeting.",
+    "parameter": [
+      {"name": "participants", "type": "array", "required": true, "description": "List of participant email addresses."},
+      {"name": "duration_minutes", "type": "integer", "required": true, "description": "Desired meeting duration in minutes."},
+      {"name": "earliest", "type": "string", "required": false, "description": "Earliest acceptable start as an ISO 8601 datetime."},
+      {"name": "latest", "type": "string", "required": false, "description": "Latest acceptable end as an ISO 8601 datetime."}
+    ]
+  },
+  {
+    "name": "send_sms",
+    "description": "Send a text message to a phone number.",
+    "parameter": [
+      {"name": "phone_number", "type": "string", "required": true, "description": "Destination phone number in E.164 format."},
+      {"name": "message", "type": "string", "required": true, "description": "Text content of the message."},
+      {"name": "sender_id", "type": "string", "required": false, "description": "Optional alphanumeric sender ID to display."}
+    ]
+  },
+  {
+    "name": "send_chat_message",
+    "description": "Post a message to a chat channel or direct conversation.",
+    "parameter": [
+      {"name": "channel", "type": "string", "required": true, "description": "Channel name or conversation ID to post to."},
+      {"name": "text", "type": "string", "required": true, "description": "Message text, supports markdown formatting."},
+      {"name": "thread_id", "type": "string", "required": false, "description": "ID of an existing thread to reply within."},
+      {"name": "mentions", "type": "array", "required": false, "description": "List of user IDs to mention in the message."}
+    ]
+  },
+  {
+    "name": "get_directions",
+    "description": "Compute turn-by-turn directions between an origin and destination.",
+    "parameter": [
+      {"name": "origin", "type": "string", "required": true, "description": "Starting address or 'lat,lon' coordinates."},
+      {"name": "destination", "type": "string", "required": true, "description": "Ending address or 'lat,lon' coordinates."},
+      {"name": "mode", "type": "string", "required": false, "description": "Travel mode: 'driving', 'walking', 'bicycling', or 'transit'."},
+      {"name": "avoid", "type": "array", "required": false, "description": "Route features to avoid, e.g. 'tolls', 'highways', 'ferries'."}
+    ]
+  },
+  {
+    "name": "geocode_address",
+    "description": "Convert a street address into latitude and longitude coordinates.",
+    "parameter": [
+      {"name": "address", "type": "string", "required": true, "description": "Free-form street address to geocode."},
+      {"name": "country", "type": "string", "required": false, "description": "ISO country code to bias the result."}
+    ]
+  },
+  {
+    "name": "search_nearby_places",
+    "description": "Find points of interest near a location by category.",
+    "parameter": [
+      {"name": "location", "type": "string", "required": true, "description": "Center point as an address or 'lat,lon'."},
+      {"name": "category", "type": "string", "required": true, "description": "Place category, e.g. 'restaurant', 'gas_station', 'pharmacy'."},
+      {"name": "radius_meters", "type": "integer", "required": false, "description": "Search radius in meters."},
+      {"name": "open_now", "type": "boolean", "required": false, "description": "Whether to return only places currently open."}
+    ]
+  },
+  {
+    "name": "transfer_funds",
+    "description": "Transfer money between two bank accounts.",
+    "parameter": [
+      {"name": "from_account", "type": "string", "required": true, "description": "Source account number or identifier."},
+      {"name": "to_account", "type": "string", "required": true, "description": "Destination account number or identifier."},
+      {"name": "amount", "type": "number", "required": true, "description": "Amount of money to transfer."},
+      {"name": "currency", "type": "string", "required": false, "description": "ISO 4217 currency code, e.g. 'USD'."},
+      {"name": "memo", "type": "string", "required": false, "description": "Optional note attached to the transaction."}
+    ]
+  },
+  {
+    "name": "get_account_balance",
+    "description": "Retrieve the current balance of a bank account.",
+    "parameter": [
+      {"name": "account_id", "type": "string", "required": true, "description": "Account identifier to query."},
+      {"name": "currency", "type": "string", "required": false, "description": "Currency to express the balance in."}
+    ]
+  },
+  {
+    "name": "list_transactions",
+    "description": "List recent transactions for an account within a date range.",
+    "parameter": [
+      {"name": "account_id", "type": "string", "required": true, "description": "Account identifier to query."},
+      {"name": "start_date", "type": "string", "required": false, "description": "Start date in YYYY-MM-DD format."},
+      {"name": "end_date", "type": "string", "required": false, "description": "End date in YYYY-MM-DD format."},
+      {"name": "limit", "type": "integer", "required": false, "description": "Maximum number of transactions to return."}
+    ]
+  },
+  {
+    "name": "make_payment",
+    "description": "Pay a bill or merchant from a funding source.",
+    "parameter": [
+      {"name": "payee", "type": "string", "required": true, "description": "Name or ID of the payee to pay."},
+      {"name": "amount", "type": "number", "required": true, "description": "Payment amount."},
+      {"name": "funding_source", "type": "string", "required": false, "description": "Card or account ID to draw funds from."},
+      {"name": "schedule_date", "type": "string", "required": false, "description": "Future date to schedule the payment for, YYYY-MM-DD."}
+    ]
+  },
+  {
+    "name": "get_stock_quote",
+    "description": "Get the latest price quote for a stock ticker.",
+    "parameter": [
+      {"name": "symbol", "type": "string", "required": true, "description": "Stock ticker symbol, e.g. 'AAPL'."},
+      {"name": "exchange", "type": "string", "required": false, "description": "Exchange code to disambiguate the listing."}
+    ]
+  },
+  {
+    "name": "get_crypto_price",
+    "description": "Get the current price of a cryptocurrency in a fiat currency.",
+    "parameter": [
+      {"name": "coin", "type": "string", "required": true, "description": "Cryptocurrency symbol or ID, e.g. 'BTC'."},
+      {"name": "vs_currency", "type": "string", "required": false, "description": "Fiat currency to quote against, e.g. 'usd'."}
+    ]
+  },
+  {
+    "name": "place_stock_order",
+    "description": "Place a buy or sell order for a security in a brokerage account.",
+    "parameter": [
+      {"name": "symbol", "type": "string", "required": true, "description": "Ticker symbol to trade."},
+      {"name": "side", "type": "string", "required": true, "description": "Order side: 'buy' or 'sell'."},
+      {"name": "quantity", "type": "number", "required": true, "description": "Number of shares to trade."},
+      {"name": "order_type", "type": "string", "required": false, "description": "Order type: 'market', 'limit', or 'stop'."},
+      {"name": "limit_price", "type": "number", "required": false, "description": "Limit price, required for limit orders."}
+    ]
+  },
+  {
+    "name": "get_historical_prices",
+    "description": "Retrieve historical price data for a security over a period.",
+    "parameter": [
+      {"name": "symbol", "type": "string", "required": true, "description": "Ticker symbol to query."},
+      {"name": "interval", "type": "string", "required": false, "description": "Bar interval: '1d', '1wk', or '1mo'."},
+      {"name": "range", "type": "string", "required": false, "description": "Lookback range, e.g. '1mo', '1y', '5y'."}
+    ]
+  },
+  {
+    "name": "search_products",
+    "description": "Search an e-commerce catalog for products matching criteria.",
+    "parameter": [
+      {"name": "query", "type": "string", "required": true, "description": "Search keywords for the product."},
+      {"name": "max_price", "type": "number", "required": false, "description": "Maximum unit price to include."},
+      {"name": "category", "type": "string", "required": false, "description": "Category to restrict the search to."},
+      {"name": "sort_by", "type": "string", "required": false, "description": "Sort order: 'relevance', 'price_asc', 'price_desc', or 'rating'."}
+    ]
+  },
+  {
+    "name": "add_to_cart",
+    "description": "Add a product to the shopping cart.",
+    "parameter": [
+      {"name": "product_id", "type": "string", "required": true, "description": "Identifier of the product to add."},
+      {"name": "quantity", "type": "integer", "required": false, "description": "Number of units to add."},
+      {"name": "options", "type": "object", "required": false, "description": "Variant selections such as size or color."}
+    ]
+  },
+  {
+    "name": "place_order",
+    "description": "Check out and place an order for the items in the cart.",
+    "parameter": [
+      {"name": "cart_id", "type": "string", "required": true, "description": "Identifier of the cart to check out."},
+      {"name": "shipping_address", "type": "object", "required": true, "description": "Shipping address with street, city, postal code, and country."},
+      {"name": "payment_method_id", "type": "string", "required": false, "description": "Saved payment method to charge."},
+      {"name": "promo_code", "type": "string", "required": false, "description": "Discount or promo code to apply."}
+    ]
+  },
+  {
+    "name": "track_shipment",
+    "description": "Get the current delivery status of a shipment.",
+    "parameter": [
+      {"name": "tracking_number", "type": "string", "required": true, "description": "Carrier tracking number for the package."},
+      {"name": "carrier", "type": "string", "required": false, "description": "Carrier code, e.g. 'ups', 'fedex', 'usps'."}
+    ]
+  },
+  {
+    "name": "search_flights",
+    "description": "Search for available flights between two airports on a date.",
+    "parameter": [
+      {"name": "origin", "type": "string", "required": true, "description": "Origin airport IATA code, e.g. 'JFK'."},
+      {"name": "destination", "type": "string", "required": true, "description": "Destination airport IATA code, e.g. 'LAX'."},
+      {"name": "departure_date", "type": "string", "required": true, "description": "Departure date in YYYY-MM-DD format."},
+      {"name": "return_date", "type": "string", "required": false, "description": "Return date for round trips, YYYY-MM-DD."},
+      {"name": "passengers", "type": "integer", "required": false, "description": "Number of passengers traveling."}
+    ]
+  },
+  {
+    "name": "book_flight",
+    "description": "Book a specific flight offer for one or more passengers.",
+    "parameter": [
+      {"name": "offer_id", "type": "string", "required": true, "description": "Identifier of the flight offer to book."},
+      {"name": "passengers", "type": "array", "required": true, "description": "List of passenger detail objects with name and birthdate."},
+      {"name": "seat_preference", "type": "string", "required": false, "description": "Seat preference: 'window', 'aisle', or 'middle'."}
+    ]
+  },
+  {
+    "name": "search_hotels",
+    "description": "Search for hotels available in a city for a date range.",
+    "parameter": [
+      {"name": "city", "type": "string", "required": true, "description": "Destination city name."},
+      {"name": "check_in", "type": "string", "required": true, "description": "Check-in date in YYYY-MM-DD format."},
+      {"name": "check_out", "type": "string", "required": true, "description": "Check-out date in YYYY-MM-DD format."},
+      {"name": "guests", "type": "integer", "required": false, "description": "Number of guests per room."},
+      {"name": "max_price_per_night", "type": "number", "required": false, "description": "Maximum nightly rate to include."}
+    ]
+  },
+  {
+    "name": "rent_car",
+    "description": "Reserve a rental car at a pickup location for a date range.",
+    "parameter": [
+      {"name": "pickup_location", "type": "string", "required": true, "description": "Pickup location, airport code or city."},
+      {"name": "pickup_date", "type": "string", "required": true, "description": "Pickup date and time in ISO 8601 format."},
+      {"name": "dropoff_date", "type": "string", "required": true, "description": "Drop-off date and time in ISO 8601 format."},
+      {"name": "vehicle_class", "type": "string", "required": false, "description": "Vehicle class: 'economy', 'suv', 'luxury', or 'van'."}
+    ]
+  },
+  {
+    "name": "set_thermostat",
+    "description": "Set the target temperature on a smart thermostat.",
+    "parameter": [
+      {"name": "device_id", "type": "string", "required": true, "description": "Identifier of the thermostat device."},
+      {"name": "target_temperature", "type": "number", "required": true, "description": "Desired temperature setpoint."},
+      {"name": "mode", "type": "string", "required": false, "description": "Operating mode: 'heat', 'cool', 'auto', or 'off'."}
+    ]
+  },
+  {
+    "name": "control_smart_light",
+    "description": "Turn a smart light on or off and adjust its brightness and color.",
+    "parameter": [
+      {"name": "device_id", "type": "string", "required": true, "description": "Identifier of the light device or group."},
+      {"name": "power", "type": "boolean", "required": true, "description": "Whether the light should be on (true) or off (false)."},
+      {"name": "brightness", "type": "integer", "required": false, "description": "Brightness level from 0 to 100."},
+      {"name": "color", "type": "string", "required": false, "description": "Color name or hex code to set."}
+    ]
+  },
+  {
+    "name": "lock_smart_door",
+    "description": "Lock or unlock a smart door lock.",
+    "parameter": [
+      {"name": "device_id", "type": "string", "required": true, "description": "Identifier of the smart lock."},
+      {"name": "locked", "type": "boolean", "required": true, "description": "Whether to lock (true) or unlock (false) the door."}
+    ]
+  },
+  {
+    "name": "play_music",
+    "description": "Start playback of a track, album, or playlist on a media device.",
+    "parameter": [
+      {"name": "query", "type": "string", "required": true, "description": "Track, artist, album, or playlist name to play."},
+      {"name": "device", "type": "string", "required": false, "description": "Target playback device or speaker name."},
+      {"name": "shuffle", "type": "boolean", "required": false, "description": "Whether to shuffle the queue."}
+    ]
+  },
+  {
+    "name": "control_playback",
+    "description": "Control current media playback such as pause, skip, or volume.",
+    "parameter": [
+      {"name": "action", "type": "string", "required": true, "description": "Playback action: 'play', 'pause', 'next', 'previous', or 'set_volume'."},
+      {"name": "volume", "type": "integer", "required": false, "description": "Volume level 0 to 100, used with 'set_volume'."}
+    ]
+  },
+  {
+    "name": "create_playlist",
+    "description": "Create a new music playlist with optional initial tracks.",
+    "parameter": [
+      {"name": "name", "type": "string", "required": true, "description": "Name of the new playlist."},
+      {"name": "track_ids", "type": "array", "required": false, "description": "List of track IDs to add initially."},
+      {"name": "public", "type": "boolean", "required": false, "description": "Whether the playlist is publicly visible."}
+    ]
+  },
+  {
+    "name": "order_food_delivery",
+    "description": "Place a food delivery order from a restaurant.",
+    "parameter": [
+      {"name": "restaurant_id", "type": "string", "required": true, "description": "Identifier of the restaurant to order from."},
+      {"name": "items", "type": "array", "required": true, "description": "List of item objects with menu item ID and quantity."},
+      {"name": "delivery_address", "type": "object", "required": true, "description": "Delivery address with street, city, and postal code."},
+      {"name": "tip", "type": "number", "required": false, "description": "Tip amount to add for the courier."}
+    ]
+  },
+  {
+    "name": "search_restaurants",
+    "description": "Find restaurants near a location matching cuisine and filters.",
+    "parameter": [
+      {"name": "location", "type": "string", "required": true, "description": "Address or 'lat,lon' to search around."},
+      {"name": "cuisine", "type": "string", "required": false, "description": "Cuisine type, e.g. 'italian', 'thai', 'vegan'."},
+      {"name": "min_rating", "type": "number", "required": false, "description": "Minimum average star rating to include."},
+      {"name": "price_level", "type": "integer", "required": false, "description": "Price level from 1 (cheap) to 4 (expensive)."}
+    ]
+  },
+  {
+    "name": "reserve_table",
+    "description": "Make a dining reservation at a restaurant.",
+    "parameter": [
+      {"name": "restaurant_id", "type": "string", "required": true, "description": "Identifier of the restaurant."},
+      {"name": "party_size", "type": "integer", "required": true, "description": "Number of people in the party."},
+      {"name": "datetime", "type": "string", "required": true, "description": "Reservation date and time in ISO 8601 format."},
+      {"name": "special_requests", "type": "string", "required": false, "description": "Any special seating or dietary requests."}
+    ]
+  },
+  {
+    "name": "web_search",
+    "description": "Search the web and return a list of relevant results.",
+    "parameter": [
+      {"name": "query", "type": "string", "required": true, "description": "Search query string."},
+      {"name": "num_results", "type": "integer", "required": false, "description": "Number of results to return."},
+      {"name": "safe_search", "type": "boolean", "required": false, "description": "Whether to enable safe search filtering."}
+    ]
+  },
+  {
+    "name": "fetch_webpage",
+    "description": "Fetch and extract the readable text content of a web page.",
+    "parameter": [
+      {"name": "url", "type": "string", "required": true, "description": "Full URL of the page to fetch."},
+      {"name": "include_links", "type": "boolean", "required": false, "description": "Whether to include extracted hyperlinks in the output."}
+    ]
+  },
+  {
+    "name": "create_note",
+    "description": "Create a new note in the user's notes app.",
+    "parameter": [
+      {"name": "title", "type": "string", "required": true, "description": "Title of the note."},
+      {"name": "content", "type": "string", "required": false, "description": "Body text of the note."},
+      {"name": "tags", "type": "array", "required": false, "description": "List of tags to categorize the note."},
+      {"name": "notebook", "type": "string", "required": false, "description": "Name of the notebook to file the note under."}
+    ]
+  },
+  {
+    "name": "set_reminder",
+    "description": "Create a reminder that notifies the user at a given time.",
+    "parameter": [
+      {"name": "text", "type": "string", "required": true, "description": "Reminder text to display."},
+      {"name": "remind_at", "type": "string", "required": true, "description": "Trigger time as an ISO 8601 datetime."},
+      {"name": "repeat", "type": "string", "required": false, "description": "Repeat interval: 'daily', 'weekly', 'monthly', or 'none'."}
+    ]
+  },
+  {
+    "name": "create_todo_task",
+    "description": "Add a task to the user's to-do list with optional metadata.",
+    "parameter": [
+      {"name": "title", "type": "string", "required": true, "description": "Short description of the task."},
+      {"name": "due_date", "type": "string", "required": false, "description": "Due date in YYYY-MM-DD format."},
+      {"name": "priority", "type": "string", "required": false, "description": "Priority level: 'low', 'medium', or 'high'."},
+      {"name": "subtasks", "type": "array", "required": false, "description": "List of subtask descriptions."}
+    ]
+  },
+  {
+    "name": "log_workout",
+    "description": "Record a completed workout session in the fitness tracker.",
+    "parameter": [
+      {"name": "activity", "type": "string", "required": true, "description": "Type of activity, e.g. 'running', 'cycling', 'yoga'."},
+      {"name": "duration_minutes", "type": "integer", "required": true, "description": "Duration of the workout in minutes."},
+      {"name": "distance_km", "type": "number", "required": false, "description": "Distance covered in kilometers."},
+      {"name": "calories_burned", "type": "integer", "required": false, "description": "Estimated calories burned."}
+    ]
+  },
+  {
+    "name": "get_health_metrics",
+    "description": "Retrieve health metrics like steps, heart rate, or sleep for a date.",
+    "parameter": [
+      {"name": "metric", "type": "string", "required": true, "description": "Metric to fetch: 'steps', 'heart_rate', 'sleep', or 'weight'."},
+      {"name": "date", "type": "string", "required": false, "description": "Date to query in YYYY-MM-DD format."}
+    ]
+  },
+  {
+    "name": "log_meal",
+    "description": "Log a meal and its nutrition to the diet tracker.",
+    "parameter": [
+      {"name": "meal_type", "type": "string", "required": true, "description": "Meal type: 'breakfast', 'lunch', 'dinner', or 'snack'."},
+      {"name": "foods", "type": "array", "required": true, "description": "List of food item objects with name and quantity."},
+      {"name": "total_calories", "type": "integer", "required": false, "description": "Total calories of the meal if known."}
+    ]
+  },
+  {
+    "name": "translate_text",
+    "description": "Translate text from one language to another.",
+    "parameter": [
+      {"name": "text", "type": "string", "required": true, "description": "Text to translate."},
+      {"name": "target_language", "type": "string", "required": true, "description": "Target language code, e.g. 'es', 'fr', 'ja'."},
+      {"name": "source_language", "type": "string", "required": false, "description": "Source language code; auto-detected if omitted."}
+    ]
+  },
+  {
+    "name": "detect_language",
+    "description": "Detect the language of a piece of text.",
+    "parameter": [
+      {"name": "text", "type": "string", "required": true, "description": "Text whose language should be detected."}
+    ]
+  },
+  {
+    "name": "upload_file",
+    "description": "Upload a file to cloud storage and return its file ID.",
+    "parameter": [
+      {"name": "file_path", "type": "string", "required": true, "description": "Local path or content reference of the file to upload."},
+      {"name": "folder_id", "type": "string", "required": false, "description": "Destination folder ID in cloud storage."},
+      {"name": "overwrite", "type": "boolean", "required": false, "description": "Whether to overwrite an existing file with the same name."}
+    ]
+  },
+  {
+    "name": "share_file",
+    "description": "Generate a sharing link or grant access to a stored file.",
+    "parameter": [
+      {"name": "file_id", "type": "string", "required": true, "description": "Identifier of the file to share."},
+      {"name": "recipients", "type": "array", "required": false, "description": "List of email addresses to grant access to."},
+      {"name": "permission", "type": "string", "required": false, "description": "Access level: 'view', 'comment', or 'edit'."},
+      {"name": "expires_in_days", "type": "integer", "required": false, "description": "Number of days until the share link expires."}
+    ]
+  },
+  {
+    "name": "list_files",
+    "description": "List files and folders within a cloud storage directory.",
+    "parameter": [
+      {"name": "folder_id", "type": "string", "required": false, "description": "Folder ID to list; root is used if omitted."},
+      {"name": "file_type", "type": "string", "required": false, "description": "Filter by type, e.g. 'document', 'image', 'spreadsheet'."}
+    ]
+  },
+  {
+    "name": "create_social_post",
+    "description": "Publish a post to a connected social media account.",
+    "parameter": [
+      {"name": "platform", "type": "string", "required": true, "description": "Target platform: 'twitter', 'facebook', 'instagram', or 'linkedin'."},
+      {"name": "content", "type": "string", "required": true, "description": "Text content of the post."},
+      {"name": "media_urls", "type": "array", "required": false, "description": "List of image or video URLs to attach."},
+      {"name": "schedule_time", "type": "string", "required": false, "description": "Future ISO 8601 time to schedule the post."}
+    ]
+  },
+  {
+    "name": "get_social_mentions",
+    "description": "Fetch recent social media mentions of a keyword or handle.",
+    "parameter": [
+      {"name": "keyword", "type": "string", "required": true, "description": "Keyword, hashtag, or @handle to monitor."},
+      {"name": "platform", "type": "string", "required": false, "description": "Platform to search; all connected if omitted."},
+      {"name": "since", "type": "string", "required": false, "description": "Only include mentions after this ISO 8601 time."}
+    ]
+  },
+  {
+    "name": "request_ride",
+    "description": "Request a ride-hailing pickup from one point to another.",
+    "parameter": [
+      {"name": "pickup", "type": "string", "required": true, "description": "Pickup address or 'lat,lon' coordinates."},
+      {"name": "dropoff", "type": "string", "required": true, "description": "Drop-off address or 'lat,lon' coordinates."},
+      {"name": "ride_type", "type": "string", "required": false, "description": "Service tier: 'standard', 'xl', 'premium', or 'pool'."},
+      {"name": "passenger_count", "type": "integer", "required": false, "description": "Number of passengers for the ride."}
+    ]
+  },
+  {
+    "name": "estimate_ride_fare",
+    "description": "Estimate the fare and wait time for a ride between two points.",
+    "parameter": [
+      {"name": "pickup", "type": "string", "required": true, "description": "Pickup address or 'lat,lon' coordinates."},
+      {"name": "dropoff", "type": "string", "required": true, "description": "Drop-off address or 'lat,lon' coordinates."},
+      {"name": "ride_type", "type": "string", "required": false, "description": "Service tier to estimate, e.g. 'standard' or 'xl'."}
+    ]
+  },
+  {
+    "name": "get_top_news",
+    "description": "Retrieve top news headlines, optionally filtered by category.",
+    "parameter": [
+      {"name": "category", "type": "string", "required": false, "description": "News category: 'world', 'business', 'tech', 'sports', or 'science'."},
+      {"name": "country", "type": "string", "required": false, "description": "ISO country code to localize headlines."},
+      {"name": "limit", "type": "integer", "required": false, "description": "Maximum number of headlines to return."}
+    ]
+  },
+  {
+    "name": "search_news_articles",
+    "description": "Search news articles by keyword across publishers.",
+    "parameter": [
+      {"name": "query", "type": "string", "required": true, "description": "Keyword or phrase to search for."},
+      {"name": "from_date", "type": "string", "required": false, "description": "Earliest publication date in YYYY-MM-DD format."},
+      {"name": "sort_by", "type": "string", "required": false, "description": "Sort order: 'relevance', 'newest', or 'popularity'."}
+    ]
+  },
+  {
+    "name": "convert_currency",
+    "description": "Convert an amount from one currency to another at current rates.",
+    "parameter": [
+      {"name": "amount", "type": "number", "required": true, "description": "Amount of money to convert."},
+      {"name": "from_currency", "type": "string", "required": true, "description": "Source ISO 4217 currency code."},
+      {"name": "to_currency", "type": "string", "required": true, "description": "Target ISO 4217 currency code."}
+    ]
+  },
+  {
+    "name": "calculate_tip",
+    "description": "Calculate a tip and split a bill among several people.",
+    "parameter": [
+      {"name": "bill_amount", "type": "number", "required": true, "description": "Total bill amount before tip."},
+      {"name": "tip_percentage", "type": "number", "required": false, "description": "Tip percentage to apply, e.g. 18."},
+      {"name": "split_between", "type": "integer", "required": false, "description": "Number of people to split the total between."}
+    ]
+  }
+]
