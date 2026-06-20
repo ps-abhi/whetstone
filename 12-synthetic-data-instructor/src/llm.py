@@ -22,6 +22,7 @@ You generate ONE realistic example for a tool-calling training dataset. You're g
 (1) Invent a single natural user request that exactly ONE of the tools can fully satisfy. 
 (2) Produce the correct call: the tool's name and an arguments object whose keys are valid parameters of that tool, with plausible, type-correct values — all required params, optional ones only if the request implies them.
 Rules: the query must sound like a real person (vary phrasing/specificity/tone); never mention tool/function/API names in the query; use only parameters that exist on the chosen tool; values must match the declared types.
+Vary sentence structure; don't always open by describing yourself
 """
 
 

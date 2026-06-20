@@ -26,13 +26,19 @@ class Record(BaseModel):
     
     @model_validator(mode="after")
     def check_calls(self):
-        tools = {t.name : {p.name for p in t.parameter} for t in self.available_tools}
+        tools = {t.name : {p.name: p.required for p in t.parameter} for t in self.available_tools}
         for call in self.tool_calls:
             if call.name not in tools:
                 raise ValueError(f"{call.name} Tool doesn't exist")
-                
-            if not set(call.arguments) <= tools[call.name]:
+            spec = tools[call.name]
+            if not set(call.arguments) <= set(spec):
                 raise ValueError("Args returned lesser.")
+            
+            required = {name for name, req in spec.items() if req}
+            missing = required - set(call.arguments)
+            if missing:
+                raise ValueError(f"{call.name} is missing required args: {missing}")
+
         return self
 
 class GeneratedExample(BaseModel):

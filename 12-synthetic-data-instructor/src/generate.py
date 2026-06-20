@@ -13,10 +13,10 @@ OUT_PATH = Path(__file__).parent.parent/"outputs"/"data"/"raw.jsonl"
 TARGET = 10
 CHUNK = 5
 
-with open(catalog_path) as f:
+with open(catalog_path, encoding="utf-8") as f:
     catalog = json.load(f)
 
-with open(scenarios_path) as f:
+with open(scenarios_path, encoding="utf-8") as f:
     scenarios = json.load(f)
 
 
@@ -24,7 +24,7 @@ def count_existing():
     if not OUT_PATH.exists():
         return 0
     else:
-        with open(OUT_PATH) as f:
+        with open(OUT_PATH, encoding="utf-8") as f:
             return sum(1 for line in f) # a neat trick i found where we generate a 1 for each line, sum then adds it all up
         
 async def make_one(): #generate 1 record
@@ -48,7 +48,7 @@ async def main():
         results = await asyncio.gather(*(make_one() for i in range(n))) # * is the unpacking operator 
         valid = [r for r in results if r is not None]
 
-        with open(OUT_PATH, "a") as f:
+        with open(OUT_PATH, "a", encoding="utf-8") as f:
             for r in valid:
                 f.write(r.model_dump_json() + "\n")
         done +=len(valid)
