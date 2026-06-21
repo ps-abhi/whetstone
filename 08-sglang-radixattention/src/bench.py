@@ -3,9 +3,9 @@ import time
 import sglang as sgl
 import requests
 import re
-from backend import self_consistency
+from backend import sglang_run, prompt, MODEL
 from transformers import AutoTokenizer
-from backend import prompt
+
 
 BASE_URL = "http://localhost:30000"
 
@@ -22,17 +22,17 @@ def get_cache_hit_rate(base_url) -> float:
 def flush_cache(base_url) -> None:
     requests.post(f"{base_url}/flush_cache")
 
-def benchmark(prompt, n, max_tokens, temperature,  base_url, tokenizer, k=10, warmup=3):
+def benchmark(run_fn, prompt, n, max_tokens, temperature,  base_url, tokenizer, k=10, warmup=3):
     for _ in range(warmup):
-        self_consistency.run(prompt=prompt, n=n, max_tokens=max_tokens, temperature=temperature)
+        run_fn(prompt, n, max_tokens, temperature)
         
     throughputs = []
     for _ in range(k):
         t0 = time.perf_counter()  # performance counter
-        state = self_consistency.run(prompt=prompt, n=n, max_tokens=max_tokens, temperature=temperature)
+        answers = run_fn(prompt, n, max_tokens, temperature)
 
         elapsed = time.perf_counter()-t0 
-        generated = count_tokens(state["answers"], tokenizer)
+        generated = count_tokens(answers, tokenizer)
         throughputs.append(generated/elapsed)
         
     return {
@@ -42,9 +42,9 @@ def benchmark(prompt, n, max_tokens, temperature,  base_url, tokenizer, k=10, wa
     
 def main():
     sgl.set_default_backend(sgl.RuntimeEndpoint(BASE_URL))
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen3-4B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(MODEL)
     flush_cache(BASE_URL)
-    results = benchmark(prompt=prompt, n=8, max_tokens=512, temperature=0.8, base_url=BASE_URL, tokenizer=tokenizer)
+    results = benchmark(sglang_run, prompt=prompt, n=8, max_tokens=512, temperature=0.8, base_url=BASE_URL, tokenizer=tokenizer)
     print(results)
 
 if __name__ == "__main__":

@@ -1,0 +1,1 @@
+vllm serve Qwen/Qwen3-4B-Instruct --port 8000 "$@"
