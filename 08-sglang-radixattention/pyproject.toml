@@ -1,0 +1,22 @@
+[project]
+name = "08-sglang-radixattention"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy==2.4.4",
+    "sglang>=0.5.2",
+    "torch==2.11.0",
+]
+
+[dependency-groups]
+dev = []
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cu130" }
+torchvision = { index = "pytorch-cu130" }
+torchaudio = { index = "pytorch-cu130" }

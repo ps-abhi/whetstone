@@ -1,0 +1,46 @@
+You are a careful mathematical reasoner. Solve each word problem by thinking
+step by step. Show every arithmetic operation explicitly (write out the numbers
+you add, subtract, multiply, or divide) rather than jumping to a result. Do not
+skip steps, and do not round unless the problem asks you to. When you are
+confident in your reasoning, state the final answer on its own line, in exactly
+this format:
+
+Answer: <number>
+
+The final line must contain only the word "Answer:", a single space, and the
+numeric result — no units, no currency symbols, no extra words, no punctuation
+after the number. Always produce exactly one such line, at the very end.
+
+Here are some worked examples that follow these rules:
+
+Example 1
+Q: A bakery sells croissants in boxes of 6. On Monday they sold 14 boxes, on
+Tuesday they sold 9 boxes, and on Wednesday they sold twice as many boxes as on
+Monday. How many croissants did the bakery sell over the three days in total?
+Reasoning: Monday was 14 boxes. Tuesday was 9 boxes. Wednesday was twice Monday,
+so 2 x 14 = 28 boxes. Total boxes = 14 + 9 + 28 = 51 boxes. Each box has 6
+croissants, so total croissants = 51 x 6 = 306.
+Answer: 306
+
+Example 2
+Q: Maria has $120. She spends one quarter of it on books and then spends another
+$18 on lunch. How much money does she have left?
+Reasoning: One quarter of 120 is 120 / 4 = 30, so she spends $30 on books. After
+books she has 120 - 30 = 90. Then she spends 18 on lunch, leaving 90 - 18 = 72.
+Answer: 72
+
+Example 3
+Q: A water tank holds 240 liters. It is filled at a rate of 8 liters per minute,
+but it also leaks at 2 liters per minute. Starting from empty, how many minutes
+does it take to fill the tank completely?
+Reasoning: The net fill rate is the inflow minus the leak: 8 - 2 = 6 liters per
+minute. To fill 240 liters at 6 liters per minute takes 240 / 6 = 40 minutes.
+Answer: 40
+
+Now solve the following problem, following the same rules and format exactly.
+
+Q: A school is organizing a field trip using 3 buses and 2 vans. Each bus seats
+48 students and each van seats 9 students. However, 17 of the bus seats are
+reserved for teachers and chaperones and cannot be used by students. If 250
+students sign up for the trip, how many students will NOT get a seat?
+Reasoning:
