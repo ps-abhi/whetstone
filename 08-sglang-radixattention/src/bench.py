@@ -3,11 +3,16 @@ import time
 import sglang as sgl
 import requests
 import re
-from backend import sglang_run, prompt, MODEL
+from backend import sglang_run, prompt, vllm_run
 from transformers import AutoTokenizer
+import hydra
+from omegaconf import OmegaConf
+import wandb
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 
-BASE_URL = "http://localhost:30000"
 
 def count_tokens(answers, tokenizer) -> int:
     return sum(len(tokenizer.encode(a)) for a in answers) # answers is a list of strs
@@ -39,12 +44,21 @@ def benchmark(run_fn, prompt, n, max_tokens, temperature,  base_url, tokenizer, 
         "throughput_tokens_per_sec" : statistics.median(throughputs),
         "cache_hit_rate" : get_cache_hit_rate(base_url)
     }
-    
-def main():
-    sgl.set_default_backend(sgl.RuntimeEndpoint(BASE_URL))
-    tokenizer = AutoTokenizer.from_pretrained(MODEL)
-    flush_cache(BASE_URL)
-    results = benchmark(sglang_run, prompt=prompt, n=8, max_tokens=512, temperature=0.8, base_url=BASE_URL, tokenizer=tokenizer)
+
+@hydra.main(version_base=None, config_path = "../configs", config_name="config")    
+def main(cfg):
+    RUNNERS = {"sglang": sglang_run, "vllm": vllm_run}
+    if cfg.engine.set_backend:
+        sgl.set_default_backend(sgl.RuntimeEndpoint(cfg.engine.base_url))
+    tokenizer = AutoTokenizer.from_pretrained(cfg.model_name)
+    wandb.login(key=os.getenv("WANDB_API_KEY"))
+    runner = wandb.init(project = cfg.wandb_project, name=f"{cfg.engine.name}-cache-{cfg.cache}",
+                        config=OmegaConf.to_container(cfg, resolve=True))
+    flush_cache(cfg.engine.base_url)
+    run_fn = RUNNERS[cfg.engine.runner]
+    results = benchmark(run_fn, prompt=prompt, n=cfg.n, max_tokens=cfg.max_tokens, temperature=cfg.temperature, base_url=cfg.engine.base_url, tokenizer=tokenizer, k=cfg.k, warmup=cfg.warmup)
+    wandb.log(results)
+    runner.finish()
     print(results)
 
 if __name__ == "__main__":

@@ -1,0 +1,4 @@
+name : vllm
+base_url : http://localhost:8000
+runner : vllm 
+set_backend : false
