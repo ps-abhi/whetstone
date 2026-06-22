@@ -1,0 +1,25 @@
+[project]
+name = "05-hf-batched-inference"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "accelerate>=1.14.0",
+    "datasets>=5.0.0",
+    "torch>=2.12.1",
+    "transformers>=5.12.1",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.18",
+]
+
+[[tool.uv.index]]
+  name = "pytorch-cu132"
+  url = "https://download.pytorch.org/whl/cu132"
+  explicit = true            # only used by packages that opt in below
+
+  [tool.uv.sources]
+  torch = [
+    { index = "pytorch-cu132", marker = "sys_platform == 'linux'" },
+  ]
