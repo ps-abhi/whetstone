@@ -6,7 +6,7 @@ seed : 42
 temperature : 0.8
 n : 8
 top_p : 0.95
-model_name : Qwen/Qwen3-4B-Instruct
+model_name : Qwen/Qwen3-4B-Instruct-2507
 cache : "on"  # without quotation, it parses it as bool True, quote ensures that it reads as on
 warmup : 3
 k : 10

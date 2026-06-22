@@ -3,7 +3,7 @@ from pathlib import Path
 from openai import OpenAI
 
 
-MODEL = "Qwen/Qwen3-4B-Instruct"
+MODEL = "Qwen/Qwen3-4B-Instruct-2507"
 
 prompt_file = Path(__file__).parent.parent/"prompts"/"prompt.txt"
 
