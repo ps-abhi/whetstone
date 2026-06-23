@@ -1,8 +1,18 @@
+import time
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch
+from datasets import load_dataset
 
 MODEL = "Qwen/Qwen3-4B-Instruct-2507"  
+BATCH_SIZES = [1, 2, 4, 8, 16, 32]
+MAX_NEW_TOKENS = 128
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def load_prompts():
+    dataset = load_dataset("openai/gsm8k", "main", split="test") # config name "main" is required 
+    subset = dataset.select(range(300))
+    question_field = subset["question"]
+    return question_field
 
 def loader(model_name):
     tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
@@ -22,7 +32,6 @@ def generate(prompts, model, tokenizer, batch_size, max_new_tokens, do_sample=Fa
         chunk_messages = [[{"role":"user", "content":p}] for p in chunk] # looping over each of the prompts
         inputs = tokenizer.apply_chat_template(chunk_messages, add_generation_prompt=True, tokenize = True, padding=True, return_tensors="pt", return_dict=True) # return_dict ensures that we get the attention mask as well
         inputs = inputs.to(device)
-        model = model.to(device)
         with torch.inference_mode():
             out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=do_sample)
             gen = out[:, inputs["input_ids"].shape[1]:]
@@ -34,4 +43,30 @@ def generate(prompts, model, tokenizer, batch_size, max_new_tokens, do_sample=Fa
            
     return results
 
-prompts = ["What is 2+2?", "Explain gravity in one sentence.", "Name three primes."]
+def run_sweep(prompts, model, tokenizer, batch_sizes, max_new_tokens):
+    generate(prompts=prompts[:8], model=model, tokenizer=tokenizer, batch_size=4, max_new_tokens=max_new_tokens)
+    results_sweep = []
+    for b in batch_sizes:
+        try: 
+            torch.cuda.reset_peak_memory_stats()
+            torch.cuda.synchronize()
+            t0 = time.perf_counter()
+            results = generate(prompts, model, tokenizer, batch_size=b, max_new_tokens=max_new_tokens, verbose=False)
+            torch.cuda.synchronize()
+            wall_time = time.perf_counter()-t0
+
+            n_tokens = sum(len(r) for r in results)
+            tokens_per_sec  = n_tokens/wall_time
+            peak_gb = torch.cuda.max_memory_allocated() / 1e9
+            results_sweep.append({"batch_size": b, "tok_per_sec": tokens_per_sec, "peak_gb": peak_gb, "oom": False})
+        except torch.cuda.OutOfMemoryError as e:
+            results_sweep.append({"batch_size": b, "tok_per_sec": None, "peak_gb": None, "oom": True})
+            torch.cuda.empty_cache()
+    for row in results_sweep:
+        print(row)
+    return results_sweep
+
+if __name__ == "__main__":
+    model, tokenizer = loader(MODEL)
+    prompts = load_prompts()
+    run_sweep(prompts, model, tokenizer, BATCH_SIZES, MAX_NEW_TOKENS)
