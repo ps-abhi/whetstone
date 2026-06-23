@@ -4,22 +4,21 @@ import torch
 from datasets import load_dataset
 
 MODEL = "Qwen/Qwen3-4B-Instruct-2507"  
-BATCH_SIZES = [1, 2, 4, 8, 16, 32]
-MAX_NEW_TOKENS = 128
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def load_prompts():
-    dataset = load_dataset("openai/gsm8k", "main", split="test") # config name "main" is required 
-    subset = dataset.select(range(300))
-    question_field = subset["question"]
+def load_prompts(id, num_samples, config, split, field):
+    dataset = load_dataset(id, config, split=split) # config name "main" is required 
+    subset = dataset.select(range(num_samples))
+    question_field = subset[field]
     return question_field
 
-def loader(model_name):
+def loader(model_name, dtype):
     tokenizer = AutoTokenizer.from_pretrained(model_name, padding_side="left")
     if tokenizer.pad_token_id is None:
         tokenizer.pad_token_id = tokenizer.eos_token_id
     
-    model = AutoModelForCausalLM.from_pretrained(model_name, dtype=torch.bfloat16)
+    model = AutoModelForCausalLM.from_pretrained(model_name, dtype=dtype)
     model.generation_config.pad_token_id = tokenizer.pad_token_id
     model.to(device)
     model.eval()
@@ -47,15 +46,15 @@ def generate(prompts, model, tokenizer, batch_size, max_new_tokens, temperature=
            
     return results
 
-def run_sweep(prompts, model, tokenizer, batch_sizes, max_new_tokens):
-    generate(prompts=prompts[:8], model=model, tokenizer=tokenizer, batch_size=4, max_new_tokens=max_new_tokens)
+def run_sweep(prompts, model, tokenizer, batch_sizes, max_new_tokens, do_sample=False, temperature=None, top_p=None):
+    generate(prompts=prompts[:8], model=model, tokenizer=tokenizer, batch_size=4, max_new_tokens=max_new_tokens, do_sample=False, temperature=None, top_p=None)
     results_sweep = []
     for b in batch_sizes:
         try: 
             torch.cuda.reset_peak_memory_stats()
             torch.cuda.synchronize()
             t0 = time.perf_counter()
-            results = generate(prompts, model, tokenizer, batch_size=b, max_new_tokens=max_new_tokens, verbose=False)
+            results = generate(prompts, model, tokenizer, batch_size=b, max_new_tokens=max_new_tokens,  do_sample=do_sample, temperature=temperature, top_p=top_p, verbose=False)
             torch.cuda.synchronize()
             wall_time = time.perf_counter()-t0
 
@@ -70,7 +69,3 @@ def run_sweep(prompts, model, tokenizer, batch_sizes, max_new_tokens):
         print(row)
     return results_sweep
 
-if __name__ == "__main__":
-    model, tokenizer = loader(MODEL)
-    prompts = load_prompts()
-    run_sweep(prompts, model, tokenizer, BATCH_SIZES, MAX_NEW_TOKENS)

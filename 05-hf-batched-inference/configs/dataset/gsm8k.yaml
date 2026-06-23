@@ -1,0 +1,6 @@
+name : gsm8k
+id : openai/gsm8k
+config : main
+split : test
+num_samples : 300
+field : question

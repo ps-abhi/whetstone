@@ -1,0 +1,9 @@
+defaults:
+  - model: qwen3_4b
+  - dataset : gsm8k
+  - generate : default
+  - _self_
+
+seed : 42
+wandb:
+  project : whetstone-05-hf-batched

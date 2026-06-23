@@ -1,4 +1,4 @@
-from inference import generate, MODEL, load_prompts
+from inference import generate, load_prompts
 from transformers import set_seed
 SEED=42
 
