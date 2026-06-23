@@ -25,15 +25,19 @@ def loader(model_name):
     model.eval()
     return (model, tokenizer)
 
-def generate(prompts, model, tokenizer, batch_size, max_new_tokens, do_sample=False, verbose=False):
+def generate(prompts, model, tokenizer, batch_size, max_new_tokens, temperature=None, top_p=None, do_sample=False, verbose=False):
     results = []
+    gen_kwargs = {"max_new_tokens" :max_new_tokens, "do_sample":do_sample}
+    if do_sample:
+        gen_kwargs["temperature"]=temperature
+        gen_kwargs["top_p"]=top_p
     for i in range(0, len(prompts), batch_size):
         chunk = prompts[i : i+batch_size]
         chunk_messages = [[{"role":"user", "content":p}] for p in chunk] # looping over each of the prompts
         inputs = tokenizer.apply_chat_template(chunk_messages, add_generation_prompt=True, tokenize = True, padding=True, return_tensors="pt", return_dict=True) # return_dict ensures that we get the attention mask as well
         inputs = inputs.to(device)
         with torch.inference_mode():
-            out = model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=do_sample)
+            out = model.generate(**inputs, **gen_kwargs)
             gen = out[:, inputs["input_ids"].shape[1]:]
             for row in gen.tolist():
                 results.append([token for token in row if token != tokenizer.pad_token_id])
@@ -59,7 +63,7 @@ def run_sweep(prompts, model, tokenizer, batch_sizes, max_new_tokens):
             tokens_per_sec  = n_tokens/wall_time
             peak_gb = torch.cuda.max_memory_allocated() / 1e9
             results_sweep.append({"batch_size": b, "tok_per_sec": tokens_per_sec, "peak_gb": peak_gb, "oom": False})
-        except torch.cuda.OutOfMemoryError as e:
+        except torch.cuda.OutOfMemoryError:
             results_sweep.append({"batch_size": b, "tok_per_sec": None, "peak_gb": None, "oom": True})
             torch.cuda.empty_cache()
     for row in results_sweep:
