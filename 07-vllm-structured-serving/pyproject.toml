@@ -1,0 +1,20 @@
+[project]
+name = "07-vllm-structured-serving"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "datasets>=5.0.0",
+    "openai>=2.43.0",
+    "pydantic>=2.13.4",
+    "pytest>=9.1.1",
+    "transformers>=5.12.1",
+    "vllm>=0.12.0; sys_platform == 'linux'",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.18",
+]
+
+[tool.pytest.ini_options]
+    pythonpath = ["src"]
