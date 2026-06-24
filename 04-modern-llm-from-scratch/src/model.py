@@ -127,9 +127,23 @@ class SwiGLU(nn.Module):
         
         return self.down_proj(silu_gate_x * up_x)
 
+class Block(nn.Module): #wiring up rmsnorm + attention + SwiGLU together
+    def __init__(self, d_model, head_dim, n_heads, n_kv_heads, max_seq_length, hidden_dim):
+        super().__init__()
+        self.attention_norm = RMSNorm(d_model)
+        self.attention = Attention(head_dim, d_model, n_heads, n_kv_heads, max_seq_length)
+        self.mlp_norm = RMSNorm(d_model)
+        self.mlp = SwiGLU(d_model, hidden_dim)
+
+    def forward(self, x, start_pos=0):
+        x = x + self.attention(self.attention_norm(x), start_pos)
+        x = x + self.mlp(self.mlp_norm(x))
+        return x
 
 
 if __name__ == "__main__":
     attn = Attention(head_dim=32, d_model=256, n_heads=8, n_kv_heads=2, max_seq_length=64)
     print(attn(torch.randn(2, 10, 256)).shape)
     print(SwiGLU(256, 683)(torch.randn(2, 10, 256)).shape) 
+    blk = Block(d_model=256, head_dim=32, n_heads=8, n_kv_heads=2, max_seq_length=64, hidden_dim=683)
+    print(blk(torch.randn(2, 10, 256)).shape)

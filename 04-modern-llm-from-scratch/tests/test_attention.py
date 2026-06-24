@@ -1,4 +1,3 @@
-from numpy import repeat
 import torch
 import torch.nn.functional as F
 from src.model import causal_attention, repeat_kv
