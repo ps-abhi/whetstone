@@ -140,6 +140,22 @@ class Block(nn.Module): #wiring up rmsnorm + attention + SwiGLU together
         x = x + self.mlp(self.mlp_norm(x))
         return x
 
+class Transformer(nn.Module):
+    def __init__(self, vocab_size, d_model, n_layers, n_heads, n_kv_heads, head_dim, max_seq_length, hidden_dim):
+        super().__init__()
+        self.embed = nn.Embedding(vocab_size, d_model)
+        self.blocks = nn.ModuleList([Block(d_model, head_dim, n_heads, n_kv_heads, max_seq_length, hidden_dim) for _ in range(n_layers)])
+        self.final_norm = RMSNorm(d_model)
+        self.lm_head = nn.Linear(d_model, vocab_size, bias=False)  # projects each position back to a score per vocab token.
+        self.lm_head.weight = self.embed.weight
+    
+    def forward(self, tokens, start_pos=0):
+        x = self.embed(tokens)
+        for block in self.blocks:
+            x = block(x, start_pos)
+        x = self.final_norm(x)
+        logits = self.lm_head(x)
+        return logits
 
 if __name__ == "__main__":
     attn = Attention(head_dim=32, d_model=256, n_heads=8, n_kv_heads=2, max_seq_length=64)
@@ -147,3 +163,7 @@ if __name__ == "__main__":
     print(SwiGLU(256, 683)(torch.randn(2, 10, 256)).shape) 
     blk = Block(d_model=256, head_dim=32, n_heads=8, n_kv_heads=2, max_seq_length=64, hidden_dim=683)
     print(blk(torch.randn(2, 10, 256)).shape)
+    model = Transformer(vocab_size=50257, d_model=256, n_layers=6, n_heads=8,
+                      n_kv_heads=2, head_dim=32, max_seq_length=64, hidden_dim=683)
+    toks = torch.randint(0, 50257, (2, 10))
+    print(model(toks).shape)
