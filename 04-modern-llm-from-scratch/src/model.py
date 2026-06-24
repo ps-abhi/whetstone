@@ -1,4 +1,5 @@
 from math import sqrt
+import torch.nn.functional as F
 from torch import rsqrt, mean
 import torch.nn as nn
 import torch
@@ -112,6 +113,23 @@ class Attention(nn.Module):
         return self.o_proj(out)
 
 
+class SwiGLU(nn.Module):
+    def __init__(self, d_model, hidden_dim):
+        super().__init__()
+        self.gate_proj = nn.Linear(d_model, hidden_dim, bias=False)
+        self.up_proj = nn.Linear(d_model, hidden_dim, bias=False)
+        self.down_proj = nn.Linear(hidden_dim, d_model, bias=False)
+
+    def forward(self, x):
+        gate_x = self.gate_proj(x)
+        up_x = self.up_proj(x)
+        silu_gate_x =  F.silu(gate_x)
+        
+        return self.down_proj(silu_gate_x * up_x)
+
+
+
 if __name__ == "__main__":
     attn = Attention(head_dim=32, d_model=256, n_heads=8, n_kv_heads=2, max_seq_length=64)
     print(attn(torch.randn(2, 10, 256)).shape)
+    print(SwiGLU(256, 683)(torch.randn(2, 10, 256)).shape) 
