@@ -1,6 +1,6 @@
 from typing import Literal, Optional
 from pydantic import BaseModel
-from datasets import load_dataset
+
 
 class Patient(BaseModel):
     patientId : str

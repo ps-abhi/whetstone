@@ -10,6 +10,8 @@ class Verdict(str, Enum):
     SCHEMA_ERROR = "schema_error" # parses but wrong shape 
 
 def validate_response(text, finish_reason=None):
+    if text is None:
+        return Verdict.PARSE_ERROR
     if finish_reason == "length":
         return Verdict.TRUNCATED
     try:

@@ -1,0 +1,12 @@
+wandb_project :  whetstone-07-vllm
+base_url :  http://localhost:5000
+seed : 42
+k : 10
+warmup : 3
+apc: "on"
+workload:
+  mode : shared
+  prefix_length : 1024
+  n_texts : 51
+  concurrency : 16
+
