@@ -1,7 +1,26 @@
-from numpy import sqrt
+from math import sqrt
 from torch import rsqrt, mean
 import torch.nn as nn
 import torch
+
+def repeat_kv(x, n_rep):
+    if n_rep == 1:
+        return x 
+    B, n_kv, T, Dh = x.shape
+    x = x[:, :, None, :, :].expand(B, n_kv, n_rep, T, Dh)
+    return x.reshape(B, n_kv * n_rep, T, Dh) # [B, n_heads, T, Dh]
+
+
+def causal_attention(q, k, v):
+    # q, k, v: [B, H, T, Dh] — k, v already expanded to H heads (call repeat_kv first)
+    Dh = q.shape[-1]
+    T = q.shape[-2]
+    scores = (q @ k.transpose(-2, -1)) / sqrt(Dh)                                # [B, H, T, T]
+    mask = torch.triu(torch.ones(T, T, dtype=torch.bool, device=q.device), diagonal=1)  # future = True
+    scores = scores.masked_fill(mask, float("-inf"))                            # block the future
+    attn = torch.softmax(scores, dim=-1)                                        # [B, H, T, T]
+    return attn @ v                                                             # [B, H, T, Dh]
+
 
 class RMSNorm(nn.Module):
     def __init__(self, dim, eps=1e-6):
@@ -84,26 +103,15 @@ class Attention(nn.Module):
         q = self.rope(q, start_pos)
         k = self.rope(k, start_pos)
 
-        def repeat_kv(x, n_rep):
-            if n_rep == 1:
-                return x 
-            B, n_kv, T, Dh = x.shape
-            x = x[:, :, None, :, :].expand(B, n_kv, n_rep, T, Dh)
-            return x.reshape(B, n_kv * n_rep, T, Dh) # [B, n_heads, T, Dh]
-            
         k = repeat_kv(k, self.n_rep) # # [B, 2, T, 32] -> [B, 8, T, 32]
         v = repeat_kv(v, self.n_rep)
 
-        scores = (q @ k.transpose(-2, -1))/sqrt(self.head_dim)
-        mask = torch.triu(torch.ones(T, T, dtype=bool, device=x.device), diagonal=1)
-        scores = scores.masked_fill(mask, float("-inf"))
-
-        attention = torch.softmax(scores, dim=-1) # [B, 8, T, T]
-        out = attention @ v #  # [B, 8, T, 32]
+        out = causal_attention(q, k, v)                                  # [B, 8, T, 32]
 
         out = out.transpose(1, 2).reshape(B, T, self.n_heads * self.head_dim)
         return self.o_proj(out)
 
 
-attn= Attention(head_dim=32, d_model=256, n_heads=8, n_kv_heads=2, max_seq_length=64)
-print(attn(torch.randn(2, 10, 256)).shape) 
+if __name__ == "__main__":
+    attn = Attention(head_dim=32, d_model=256, n_heads=8, n_kv_heads=2, max_seq_length=64)
+    print(attn(torch.randn(2, 10, 256)).shape)
